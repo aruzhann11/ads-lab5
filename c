@@ -29,3 +29,51 @@
 Выведите одно целое число - максимальную сумму денег, которую может заработать стадион.
 
 
+#include <iostream>
+using namespace std;
+
+const int N = 100005;
+long long a[N];
+
+void quickSort(long long arr[], int l, int r) {
+    int i = l, j = r;
+    long long pivot = arr[(l + r) / 2];
+    while (i <= j) {
+        while (arr[i] > pivot) i++;
+        while (arr[j] < pivot) j--;
+        if (i <= j) {
+            long long tmp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = tmp;
+            i++; j--;
+        }
+    }
+    if (l < j) quickSort(arr, l, j);
+    if (i < r) quickSort(arr, i, r);
+}
+
+int main() {
+    int n, m;
+    cin >> n >> m;
+    for (int i = 0; i < n; i++) cin >> a[i];
+
+    quickSort(a, 0, n - 1); 
+
+    long long total = 0;
+
+    for (int k = 0; k < m; k++) {
+        total += a[0];
+        a[0]--;
+
+        int i = 0;
+        while (i + 1 < n && a[i] < a[i + 1]) {
+            long long tmp = a[i];
+            a[i] = a[i + 1];
+            a[i + 1] = tmp;
+            i++;
+        }
+    }
+
+    cout << total << endl;
+    return 0;
+}
