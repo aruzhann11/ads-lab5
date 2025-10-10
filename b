@@ -29,79 +29,64 @@
 #include <iostream>
 using namespace std;
 
-class Heap {
-private:
-    int* arr;
-    int heapSize;
-    int arrSize;
+const int N = 100005;
+long long heapArr[N];
+int heapSize = 0;
 
-    int left(int i) { return 2 * i + 1; }
-    int right(int i) { return 2 * i + 2; }
-    int parent(int i) { return (i - 1) / 2; }
-
-public:
-    Heap(int* newArr, int heapSize, int arrSize) {
-        this->heapSize = heapSize;
-        this->arrSize = arrSize;
-        arr = new int[arrSize];
-        for (int i = 0; i < arrSize; i++) arr[i] = newArr[i];
+void push(long long x) {
+    heapArr[++heapSize] = x;
+    int i = heapSize;
+    while (i > 1 && heapArr[i] > heapArr[i / 2]) {
+        long long tmp = heapArr[i];
+        heapArr[i] = heapArr[i / 2];
+        heapArr[i / 2] = tmp;
+        i /= 2;
     }
+}
 
-    ~Heap() { delete[] arr; }
-
-    void heapify(int i) {
+long long pop() {
+    long long maxVal = heapArr[1];
+    heapArr[1] = heapArr[heapSize--];
+    int i = 1;
+    while (true) {
+        int left = i * 2;
+        int right = i * 2 + 1;
         int largest = i;
-        int l = left(i);
-        int r = right(i);
-        if (l < heapSize && arr[l] > arr[largest]) largest = l;
-        if (r < heapSize && arr[r] > arr[largest]) largest = r;
-        if (largest != i) {
-            swap(arr[i], arr[largest]);
-            heapify(largest);
-        }
-    }
 
-    void buildHeap() {
-        for (int i = (heapSize - 2) / 2; i >= 0; i--) heapify(i);
-    }
+        if (left <= heapSize && heapArr[left] > heapArr[largest])
+            largest = left;
+        if (right <= heapSize && heapArr[right] > heapArr[largest])
+            largest = right;
 
-    int extractMax() {
-        if (heapSize <= 0) return 0;
-        int root = arr[0];
-        arr[0] = arr[heapSize - 1];
-        heapSize--;
-        heapify(0);
-        return root;
-    }
+        if (largest == i) break;
 
-    void insertInHeap(int val) {
-        heapSize++;
-        arr[heapSize - 1] = val;
-        int i = heapSize - 1;
-        while (i != 0 && arr[parent(i)] < arr[i]) {
-            swap(arr[i], arr[parent(i)]);
-            i = parent(i);
-        }
-    }
+        long long tmp = heapArr[i];
+        heapArr[i] = heapArr[largest];
+        heapArr[largest] = tmp;
 
-    int size() { return heapSize; }
-};
+        i = largest;
+    }
+    return maxVal;
+}
 
 int main() {
-    int N;
-    cin >> N;              
-    int* arr = new int[N];  
-    for (int i = 0; i < N; i++) cin >> arr[i];
+    int n;
+    cin >> n;
 
-    Heap h(arr, N, N);
-    h.buildHeap();
-
-    while (h.size() > 1) {
-        int a = h.extractMax();
-        int b = h.extractMax();
-        if (a != b) h.insertInHeap(a - b);  
+    for (int i = 0; i < n; i++) {
+        long long x;
+        cin >> x;
+        push(x);
     }
 
-    cout << h.extractMax();  
-    delete[] arr;
+    while (heapSize > 1) {
+        long long a = pop(); 
+        long long b = pop(); 
+        if (a != b) {
+            push(a - b); 
+        }
+    }
+
+    cout << (heapSize == 1 ? heapArr[1] : 0) << endl;
+    return 0;
 }
