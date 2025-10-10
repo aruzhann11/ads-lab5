@@ -18,4 +18,105 @@
 Формат вывода
 Выведите одно целое число - минимальная стоимость операций.
 
+#include <iostream>
+using namespace std;
 
+class MinHeap {
+private:
+    long long *arr;
+    int size;
+    int capacity;
+
+    void swap(long long &a, long long &b) {
+        long long tmp = a;
+        a = b;
+        b = tmp;
+    }
+
+    void heapify_up(int i) {
+        while (i > 0) {
+            int parent = (i - 1) / 2;
+            if (arr[parent] > arr[i]) {
+                swap(arr[parent], arr[i]);
+                i = parent;
+            } else break;
+        }
+    }
+
+    void heapify_down(int i) {
+        while (true) {
+            int left = 2 * i + 1;
+            int right = 2 * i + 2;
+            int smallest = i;
+
+            if (left < size && arr[left] < arr[smallest]) smallest = left;
+            if (right < size && arr[right] < arr[smallest]) smallest = right;
+
+            if (smallest != i) {
+                swap(arr[i], arr[smallest]);
+                i = smallest;
+            } else break;
+        }
+    }
+
+public:
+    MinHeap(int cap) {
+        arr = new long long[cap];
+        size = 0;
+        capacity = cap;
+    }
+
+    ~MinHeap() {
+        delete[] arr;
+    }
+
+    void push(long long x) {
+        arr[size] = x;
+        heapify_up(size);
+        size++;
+    }
+
+    long long top() {
+        if (size == 0) return -1;
+        return arr[0];
+    }
+
+    void pop() {
+        if (size == 0) return;
+        arr[0] = arr[size - 1];
+        size--;
+        heapify_down(0);
+    }
+
+    int getSize() { return size; }
+};
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n;
+    cin >> n;
+
+    MinHeap heap(n + 5);
+    for (int i = 0; i < n; i++) {
+        long long x;
+        cin >> x;
+        heap.push(x);
+    }
+
+    long long total = 0;
+    while (heap.getSize() > 1) {
+        long long a = heap.top();
+        heap.pop();
+        long long b = heap.top();
+        heap.pop();
+
+        long long sum = a + b;
+        total += sum;
+        heap.push(sum);
+    }
+
+    cout << total << "\n";
+    return 0;
+}
