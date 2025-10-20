@@ -29,64 +29,98 @@
 #include <iostream>
 using namespace std;
 
-const int N = 100005;
-long long heapArr[N];
-int heapSize = 0;
+class MaxHeap {
+private:
+    int heapSize;
+    int arrSize;
+    long long* arr;
 
-void push(long long x) {
-    heapArr[++heapSize] = x;
-    int i = heapSize;
-    while (i > 1 && heapArr[i] > heapArr[i / 2]) {
-        long long tmp = heapArr[i];
-        heapArr[i] = heapArr[i / 2];
-        heapArr[i / 2] = tmp;
-        i /= 2;
+    int parent(int i) {
+      return (i - 1) / 2; 
     }
-}
-
-long long pop() {
-    long long maxVal = heapArr[1];
-    heapArr[1] = heapArr[heapSize--];
-    int i = 1;
-    while (true) {
-        int left = i * 2;
-        int right = i * 2 + 1;
-        int largest = i;
-
-        if (left <= heapSize && heapArr[left] > heapArr[largest])
-            largest = left;
-        if (right <= heapSize && heapArr[right] > heapArr[largest])
-            largest = right;
-
-        if (largest == i) break;
-
-        long long tmp = heapArr[i];
-        heapArr[i] = heapArr[largest];
-        heapArr[largest] = tmp;
-
-        i = largest;
+    int left(int i) {
+      return 2 * i + 1; 
     }
-    return maxVal;
-}
+    int right(int i) { 
+      return 2 * i + 2;
+     }
+
+public:
+    MaxHeap(int arrSize) {
+        this->heapSize = 0;
+        this->arrSize = arrSize;
+        arr = new long long[arrSize];
+    }
+
+    ~MaxHeap() {
+         delete[] arr; 
+        }
+
+    void heapify(int i) {
+        int smallest = i;
+        int l = left(i);
+        int r = right(i);
+
+        if (l < heapSize && arr[l] > arr[smallest]) smallest = l;
+        if (r < heapSize && arr[r] > arr[smallest]) smallest = r;
+
+        if (smallest != i) {
+            swap(arr[i], arr[smallest]);
+            heapify(smallest);
+        }
+    }
+
+    void unheapify(int i) {
+        int p = parent(i);
+        if (p >= 0 && arr[p] < arr[i]) {
+            swap(arr[p], arr[i]);
+            unheapify(p);
+        }
+    }
+
+    void Insert(long long val) {
+        arr[heapSize] = val;
+        heapSize++;
+        unheapify(heapSize - 1);
+    }
+
+    long long extractMax() {
+        long long root = arr[0];
+        arr[0] = arr[heapSize - 1];
+        heapSize--;
+        heapify(0);
+        return root;
+    }
+
+    long long top() { 
+        return arr[0]; 
+    }
+
+    int getsize() { 
+        return heapSize; 
+    }
+};
 
 int main() {
     int n;
     cin >> n;
+    long long arr[n];
+    MaxHeap h(1000);
 
     for (int i = 0; i < n; i++) {
-        long long x;
-        cin >> x;
-        push(x);
+        cin >> arr[i];
+        h.Insert(arr[i]);
     }
 
-    while (heapSize > 1) {
-        long long a = pop(); 
-        long long b = pop(); 
-        if (a != b) {
-            push(a - b); 
+    while (h.getsize() > 1) {
+        long long a = h.extractMax();
+        long long b = h.extractMax();
+        if(a!=b){
+            h.Insert(a-b);
         }
     }
-
-    cout << (heapSize == 1 ? heapArr[1] : 0) << endl;
-    return 0;
+     if(h.getsize()==0)
+        cout<<0;
+        else
+        cout<<h.top();
 }
