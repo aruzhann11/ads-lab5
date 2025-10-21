@@ -32,48 +32,86 @@
 #include <iostream>
 using namespace std;
 
-const int N = 100005;
-long long a[N];
+class MaxHeap{
+    private:
+    long long* arr;
+    int arrSize;
+    int HeapSize;
 
-void quickSort(long long arr[], int l, int r) {
-    int i = l, j = r;
-    long long pivot = arr[(l + r) / 2];
-    while (i <= j) {
-        while (arr[i] > pivot) i++;
-        while (arr[j] < pivot) j--;
-        if (i <= j) {
-            long long tmp = arr[i];
-            arr[i] = arr[j];
-            arr[j] = tmp;
-            i++; j--;
-        }
+    int left(int i){
+        return 2*i+1;
     }
-    if (l < j) quickSort(arr, l, j);
-    if (i < r) quickSort(arr, i, r);
-}
-
-int main() {
-    int n, m;
-    cin >> n >> m;
-    for (int i = 0; i < n; i++) cin >> a[i];
-
-    quickSort(a, 0, n - 1); 
-
-    long long total = 0;
-
-    for (int k = 0; k < m; k++) {
-        total += a[0];
-        a[0]--;
-
-        int i = 0;
-        while (i + 1 < n && a[i] < a[i + 1]) {
-            long long tmp = a[i];
-            a[i] = a[i + 1];
-            a[i + 1] = tmp;
-            i++;
-        }
+    
+    int right(int i){
+        return 2*i+2;
+    }
+    
+    int parent(int i){
+        return (i-1)/2;
     }
 
-    cout << total << endl;
-    return 0;
+    public:
+    MaxHeap(int arrSize){
+        this->arrSize=arrSize;
+        this->HeapSize=0;
+        arr=new long long[arrSize];
+    }
+
+    void heapify(int i){
+        int largest=i;
+        int l=left(i);
+        int r=right(i);
+        if(l<HeapSize && arr[l]>arr[i]) largest=l;
+        if(r<HeapSize && arr[r]>arr[i]) largest=r;
+        if(largest!=i){
+            swap(arr[i],arr[largest]);
+            heapify(largest);
+        }
+
+    }
+    void unheapify(int i){
+        int p=parent(i);
+        if(p>=0 && arr[p]<arr[i]){
+            swap(arr[i],arr[p]);
+            unheapify(p);
+        }
+    }
+    void insert(long long val){
+        arr[HeapSize]=val;
+        HeapSize++;
+        unheapify(HeapSize-1);
+
+    }
+    void deleteInHeap(){
+        arr[0]=arr[HeapSize-1];
+        HeapSize--;
+        heapify(0);
+    }
+    long long top(){
+        return arr[0];
+    }
+    int getSize(){
+        return HeapSize;
+    }
+};
+int main(){
+    int n,m;
+    cin>>n>>m;
+
+    long long a[n];
+    MaxHeap h(n+5);
+    for(int i=0;i<n;i++){
+        cin>>a[i];
+    }
+    long long total=0;
+    for(int i=0;i<m;i++){
+        long long top=h.top();
+        total+=top;
+        h.deleteInHeap();
+        if(top-1>0){
+            h.insert(top-1);
+        }
+    }
+    cout<<total;
+
 }
