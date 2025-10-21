@@ -33,107 +33,91 @@
 . Если это невозможно, распечатайте 
 .
 
- #include <iostream>
+#include <iostream>
 using namespace std;
 
-class MinHeap {
-private:
-    long long *arr;
-    int size;
-    int capacity;
+class MinHeap{
+    private:
+    long long* arr;
+    int arrSize;
+    int heapSize;
 
-    void swap(long long &a, long long &b) {
-        long long t = a; a = b; b = t;
+    int left(int i){
+        return 2*i+1;
     }
+     int right(int i){
+        return 2*i+2;
+    }
+     int parent(int i){
+        return (i-1)/2;
+    }
+    public:
+    MinHeap(int arrSize){
+        this->heapSize=0;
+        this->arrSize=arrSize;
+        arr=new long long[arrSize];
+    }
+    void heapify(int i){
+        int smallest=i;
+        int l=left(i);
+        int r=right(i);
+        if(l<heapSize && arr[l]<arr[smallest]) smallest=l;
+        if(r<heapSize && arr[r]<arr[smallest]) smallest=r;
 
-    void heapify_up(int i) {
-        while (i > 0) {
-            int parent = (i - 1) / 2;
-            if (arr[parent] > arr[i]) {
-                swap(arr[parent], arr[i]);
-                i = parent;
-            } else break;
+        if(smallest!=i){
+            swap(arr[i],arr[smallest]);
+            heapify(smallest);
         }
     }
-
-    void heapify_down(int i) {
-        while (true) {
-            int left = 2 * i + 1, right = 2 * i + 2, smallest = i;
-            if (left < size && arr[left] < arr[smallest]) smallest = left;
-            if (right < size && arr[right] < arr[smallest]) smallest = right;
-            if (smallest != i) {
-                swap(arr[i], arr[smallest]);
-                i = smallest;
-            } else break;
+    void unheapify(int i){
+        int p=parent(i);
+        if(p>=0 && arr[p]>arr[i]){
+            swap(arr[p],arr[i]);
+            unheapify(p);
         }
     }
-
-public:
-    MinHeap(int cap) {
-        arr = new long long[cap];
-        size = 0;
-        capacity = cap;
+    void Insert(long long val){
+        arr[heapSize]=val;
+        heapSize++;
+        unheapify(heapSize-1);
     }
-
-    ~MinHeap() {
-        delete[] arr;
+    void deleteInHeap(){
+        arr[0]=arr[heapSize-1];;
+        heapSize--;
+        heapify(0);
     }
-
-    void push(long long x) {
-        arr[size] = x;
-        heapify_up(size);
-        size++;
-    }
-
-    void pop() {
-        if (size == 0) return;
-        arr[0] = arr[size - 1];
-        size--;
-        heapify_down(0);
-    }
-
-    long long top() {
+    int top(){
         return arr[0];
     }
-
-    int sz() {
-        return size;
-    }
-
-    bool empty() {
-        return size == 0;
+    int getSize(){
+        return heapSize;
     }
 };
 
-int main() {
-    ios::sync_with_stdio(false);
-    cin.tie(nullptr);
-
+int main(){
     int n;
     long long m;
-    cin >> n >> m;
-
-    MinHeap heap(n + 5);
-    for (int i = 0; i < n; i++) {
-        long long x;
-        cin >> x;
-        heap.push(x);
+    cin>>n>>m;
+    int arr[n];
+    MinHeap h(n+5);
+    for(int i;i<n;i++){
+        cin>>arr[i];
+        h.Insert(arr[i]);
     }
+  int operations=0;
+  while(h.getSize()>=2 && h.top()<m){
+    long long a=h.top(); h.deleteInHeap();
+    long long b=h.top(); h.deleteInHeap();
 
-    int operations = 0;
-    while (heap.sz() >= 2 && heap.top() < m) {
-        long long a = heap.top(); heap.pop();
-        long long b = heap.top(); heap.pop();
+    long long mix=a+2*b;
+    h.Insert(mix);
+    operations++;
 
-        long long newMix = a + 2 * b;
-        heap.push(newMix);
-        operations++;
-    }
+  }   
 
-    if (heap.top() < m)
-        cout << -1 << "\n";
-    else
-        cout << operations << "\n";
-
-    return 0;
+  if(h.top()<m){
+    cout<<-1<<'\n';
+  } else{
+    cout<<operations<<'\n';
+  }
 }
